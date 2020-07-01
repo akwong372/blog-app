@@ -2,6 +2,7 @@
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const _ = require('lodash');
 const ejs = require("ejs");
 
 const homeStartingContent = "Lacus vel facilisis volutpat est velit egestas dui id ornare. Semper auctor neque vitae tempus quam. Sit amet cursus sit amet dictum sit amet justo. Viverra tellus in hac habitasse. Imperdiet proin fermentum leo vel orci porta. Donec ultrices tincidunt arcu non sodales neque sodales ut. Mattis molestie a iaculis at erat pellentesque adipiscing. Magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies. Adipiscing elit ut aliquam purus sit amet luctus venenatis lectus. Ultrices vitae auctor eu augue ut lectus arcu bibendum at. Odio euismod lacinia at quis risus sed vulputate odio ut. Cursus mattis molestie a iaculis at erat pellentesque adipiscing.";
@@ -14,29 +15,47 @@ const app = express();
 
 app.set('view engine', 'ejs');
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.get('/', (req, res) => {
-  res.render('home', {homeStartingContent: homeStartingContent});
+  res.render('home', {
+    homeStartingContent,
+    blogPosts
+  });
 });
 
 app.get('/about', (req, res) => {
-  res.render('about', {aboutContent: aboutContent});
+  res.render('about', { aboutContent: aboutContent });
 });
 
 app.get('/contact', (req, res) => {
-  res.render('contact', {contactContent: contactContent});
+  res.render('contact', { contactContent: contactContent });
 });
 
 app.get('/compose', (req, res) => {
   res.render('compose');
 });
 
+app.get('/posts/:postTitle', (req, res) => {
+  const kebabPostTitle = _.kebabCase(req.params.postTitle);
+  for (var i = 0; i < blogPosts.length; i++) {
+    const storedKebab = _.kebabCase(blogPosts[i].title);
+    if (storedKebab === kebabPostTitle) {
+      return res.render('post', { title: blogPosts[i].title, content: blogPosts[i].content });
+    }
+  }
+  res.redirect('/');
+});
+
 app.post('/compose', (req, res) => {
   const newPost = {
     title: req.body.newPostTitle,
+    link: `/posts/${req.body.newPostTitle}`,
     content: req.body.newPostContent
+  }
+  if (newPost.content.length > 100) {
+    newPost.truncated = newPost.content.slice(0, 100) + '...';
   }
   blogPosts.push(newPost);
 
@@ -54,6 +73,6 @@ app.post('/compose', (req, res) => {
 
 
 
-app.listen(3000, function() {
+app.listen(3000, function () {
   console.log("Server started on port 3000");
 });

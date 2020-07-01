@@ -3,4 +3,13 @@
 <h1>Home</h1>
 <p><%= homeStartingContent %></p>
 
+<% blogPosts.forEach((post) => { %>
+    <h1><%= post.title %></h1>
+    <% if (post.truncated){ %>
+        <p><%= post.truncated %> <a href="<%= post.link %>">Read more</a></p>
+    <% } else { %>
+    <p><%= post.content %> <a href="<%= post.link %>">Read more</a></p>
+    <% } %>
+<% }) %>
+
 <%- include("partials/footer") %>
