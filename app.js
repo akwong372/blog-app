@@ -49,13 +49,16 @@ app.get('/compose', (req, res) => {
 
 app.get('/posts/:postTitle', (req, res) => {
   const kebabPostTitle = _.kebabCase(req.params.postTitle);
-  for (var i = 0; i < blogPosts.length; i++) {
-    const storedKebab = _.kebabCase(blogPosts[i].title);
-    if (storedKebab === kebabPostTitle) {
-      return res.render('post', { title: blogPosts[i].title, content: blogPosts[i].content });
+
+  db.PostModel.find({}, (err, posts)=>{
+    for (var i = 0; i < posts.length; i++) {
+      const storedKebab = _.kebabCase(posts[i].title);
+      if (storedKebab === kebabPostTitle) {
+        return res.render('post', { title: posts[i].title, content: posts[i].content });
+      }
     }
-  }
-  res.redirect('/');
+    res.redirect('/');
+  });
 });
 
 app.post('/compose', (req, res) => {
